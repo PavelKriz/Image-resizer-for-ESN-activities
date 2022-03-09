@@ -8,11 +8,15 @@
 # (meets specification of activities.esn.org) 
 #
 
+# === IMPORTS ===
+
 #from os.path import splitext       
 import PySimpleGUI as sg
 import os.path
 import cv2 as cv
 import numpy as np
+
+# === CONSTANTS ===
 
 # 1920 (width) x 460 (height) is the ESN form format
 desired_width = 1920
@@ -35,51 +39,31 @@ supported_extensions = (".bmp",
                             ".tif",
                             ".hdr",)
 
-
-# when the image has tighter angle than the ESN specification 
-# out_image should be image of size 1920x460 with 255 value everywhere
-def scale_to_match_height(in_img, out_img):
-    # get sizes
-    content_width = round(in_img.shape[1] * (desired_height / in_img.shape[0]))
-    content_height = desired_height
-
-    # scale the content correctly
-    out_scaled_img = cv.resize(in_img, (content_width, content_height), interpolation = cv.INTER_AREA)
-
-    # put the scaled image into the white image
-    x_start = int(desired_width / 2 - content_width / 2)
-    out_img[0: content_height, x_start : (x_start + content_width), 0:3] = out_scaled_img
-
-
-# when the image has wider angle than the ESN specification 
-# out_image should be image of size 1920x460 with 255 value everywhere
-def scale_to_match_width(in_img, out_img):
-    # get sizes
-    content_width = desired_width
-    content_height = round(in_img.shape[0] * (desired_width / in_img.shape[1]))
-
-    # scale the content correctly
-    out_scaled_img = cv.resize(in_img, (content_width, content_height), interpolation = cv.INTER_AREA)
-
-    # put the scaled image into the white image
-    y_start = int(desired_height / 2 - content_height / 2)
-    out_img[y_start : (y_start + content_height),0 : content_width, 0:3] = out_scaled_img
-
+# === RESIZING ===
 
 # function that calculates and returns the resized image
 def calc_resized_image(filename):
     # read the image
     in_img = cv.imread(filename, cv.IMREAD_COLOR)
+    # create image of desired size with white background
     out_img = 255 * np.ones((desired_height, desired_width, 3), dtype=np.uint8)
 
-    # decide if the image has less wider angle then the ESN specification 
-    if in_img.shape[1] / in_img.shape[0] < desired_width / desired_height:
-        # it does not have wider angle
-        scale_to_match_height(in_img, out_img)
-    else:
-        # it has wider angle
-        scale_to_match_width(in_img, out_img)
+    #get the new size of the content
+    scale_factor = min(desired_height / in_img.shape[0], desired_width / in_img.shape[1] )
+    content_width = round(in_img.shape[1] * scale_factor)
+    content_height = round(in_img.shape[0] * scale_factor)
+    
+    # scale the content correctly
+    out_scaled_img = cv.resize(in_img, (content_width, content_height), interpolation = cv.INTER_AREA)
 
+    # calculate the left corner of the new place for the content
+    x_start = round((desired_width - content_width) / 2)
+    y_start = round((desired_height - content_height) / 2)
+
+    # put the scaled image into the white image
+    out_img[y_start : (y_start + content_height), x_start : (x_start + content_width), 0:3] = out_scaled_img
+
+    # return result
     return out_img
 
 
@@ -115,6 +99,7 @@ layout = [
 ]
 
 # === APPLICATION LOOP ===
+
 # create window
 window = sg.Window("Image resizer for activities.esn.org", layout)
 # run the application loop
@@ -187,6 +172,8 @@ while True:
         except:
             # file was not probably selected
             pass
+
+# === END ===
 
 # release the window
 window.close()
