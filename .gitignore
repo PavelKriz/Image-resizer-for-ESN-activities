@@ -1,3 +1,4 @@
 *.png
 *.jpg
 !example_images/*
+!about/*
