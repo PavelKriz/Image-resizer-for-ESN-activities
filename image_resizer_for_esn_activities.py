@@ -101,10 +101,11 @@ file_list_column = [
 ]
 # right column/part
 image_viewer_column = [
-    [sg.Text("Choose an image from list on left:")],
+    [sg.Text("1. Choose a directory with images you want to resize [Browse]")],
+    [sg.Text("2. Choose an image from list on left:")],
     [sg.Text(size=(100, 1), key="-TOUT-")],
     [sg.Image(key="-IMAGE-")],
-    [sg.Button("Save jpg"), sg.Button("Save")],
+    [sg.Text("3. Save"), sg.Button("Save jpg"), sg.Button("Save")],
 ]
 # merging column layouts together
 layout = [
