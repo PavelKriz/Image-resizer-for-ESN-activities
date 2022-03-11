@@ -8,6 +8,10 @@
 # (meets specification of activities.esn.org) 
 #
 
+# === APPLICATION LOAD ===
+
+print("Loading application. Wait please...")
+
 # === IMPORTS ===
 
 #from os.path import splitext       
@@ -44,7 +48,7 @@ supported_extensions = (".bmp",
 # function that calculates and returns the resized image
 def calc_resized_image(filename):
     # read the image
-    in_img = cv.imread(filename, cv.IMREAD_COLOR)
+    in_img = open_image_data(filename)
     # create image of desired size with white background
     out_img = 255 * np.ones((desired_height, desired_width, 3), dtype=np.uint8)
 
@@ -67,7 +71,20 @@ def calc_resized_image(filename):
     return out_img
 
 
+# === LOAD IMAGE ===
+
+# open the image and returning the image data
+# opencv does not handle unicode paths, so thats why the open function is used here
+def open_image_data(filepath):
+    stream = open(filepath, "rb")
+    bytes = bytearray(stream.read())
+    numpyarray = np.asarray(bytes, dtype=np.uint8)
+    # bgr image
+    return cv.imdecode(numpyarray, cv.IMREAD_COLOR)
+
+
 # === LAYOUT ===
+
 # layout is divided in two main parts, left and right one
 # left column/part
 file_list_column = [
@@ -97,6 +114,11 @@ layout = [
         sg.Column(image_viewer_column),
     ]
 ]
+
+
+# === START INFO ===
+
+print("Ready")
 
 # === APPLICATION LOOP ===
 
@@ -163,12 +185,18 @@ while True:
             out_img = calc_resized_image(filename)
 
             # does the user wants to save it in original format or jpg?
+            # also encode the image
             if event == "Save jpg":
                 out_name = os.path.splitext(filename)[0] + "_ESN_OK" + ".jpg"   
+                is_success, im_buf_arr = cv.imencode(".jpg", out_img)
             else:
                 out_name = os.path.splitext(filename)[0] + "_ESN_OK" + os.path.splitext(filename)[1]
+                is_success, im_buf_arr = cv.imencode(os.path.splitext(filename)[1], out_img)
+
+            # opencv's imwrite does not work with utf8 so the numpy's toFile is used
+            im_buf_arr.tofile(out_name)
             # save file
-            cv.imwrite(out_name, out_img)
+            print("Saved: " + out_name)
         except:
             # file was not probably selected
             pass

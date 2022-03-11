@@ -2,3 +2,8 @@
 *.jpg
 !example_images/*
 !about/*
+dist
+build
+__pycache__
+esn_image_script.spec
+esn_img_venv
