@@ -15,3 +15,10 @@ To add activity to activities.esn.org a image of an exact size 1920x460 is neede
 ![Example 2](/about/app2.jpg)
 ![Example 3](/about/app3.jpg)
 
+## Installation
+
+    sudo apt-get install python3-tk
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    
