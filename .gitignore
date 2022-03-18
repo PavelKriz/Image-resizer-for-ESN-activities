@@ -1,5 +1,6 @@
 *.png
 *.jpg
+.venv/
 !example_images/*
 !about/*
 dist
